@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "218641436344",
+    "project_id": "protector-23320",
+    "storage_bucket": "protector-23320.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:218641436344:android:afd3ae8b4d8ae9ce156e4d",
+        "android_client_info": {
+          "package_name": "my.protector424"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "218641436344-2ur1tnbeo1o4pi2md9fn9k0jg2c8s8j6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3-rNelSxvyomK_Ue37oSUXzMTEXLdeqs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "218641436344-2ur1tnbeo1o4pi2md9fn9k0jg2c8s8j6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
