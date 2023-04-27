@@ -26,7 +26,6 @@ class Player {
   void move(Cell cell, List<List<Cell>> cells) {
     if (actionpoint > 0) {
       actionpoint--;
-      // update player position...
       // Set isValidMove to false for all cells
       cells.forEach((rowCells) {
         rowCells.forEach((c) => c.isValidMove = false);
@@ -95,8 +94,8 @@ class Player {
       bool isHighlightModeOn) {
     if (actionpoint > 0) {
       actionpoint--;
-      // update enemy health...
-      // find the enemy in the list that corresponds to the given cell
+
+      // find the enemy in the list
       Enemy enemy = enemies.firstWhere(
           (enemy) => enemy.row == enemyCell.row && enemy.col == enemyCell.col);
 
