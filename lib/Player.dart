@@ -43,6 +43,10 @@ class Player {
   void move(Cell cell, List<List<Cell>> cells) {
     if (actionpoint > 0) {
       actionpoint--;
+<<<<<<< HEAD
+=======
+      // Set isValidMove to false for all cells
+>>>>>>> 8b7346b1122139336d21fcc9efcbdc30a27a6798
       cells.forEach((rowCells) {
         rowCells.forEach((c) => c.isValidMove = false);
       });
@@ -145,6 +149,10 @@ class Player {
       bool isHighlightModeOn, List<Tree> trees, List<Water> waterr) {
     if (actionpoint > 0) {
       actionpoint--;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8b7346b1122139336d21fcc9efcbdc30a27a6798
       // find the enemy in the list
       Enemy enemy = enemies.firstWhere(
           (enemy) => enemy.row == enemyCell.row && enemy.col == enemyCell.col);
