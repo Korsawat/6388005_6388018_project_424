@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:project1/Multi.dart';
 import 'package:uuid/uuid.dart';
+import 'Cell.dart';
+import 'Type.dart';
 import 'single.dart';
 
 void main() async {
@@ -69,7 +71,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => Single()),
+                      MaterialPageRoute(
+                          builder: (context) => SelectPlayerTypePage()),
                     );
                   },
                   child: Container(
@@ -95,37 +98,37 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ),
                 ),
-                SizedBox(height: 50),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => GamePage()),
-                    );
-                  },
-                  child: Container(
-                    height: 60.0,
-                    width: 200.0,
-                    child: Center(
-                      child: Text(
-                        'Multiplayer',
-                        style: TextStyle(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.5),
-                      ),
-                    ),
-                  ),
-                  style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.blue),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                      ),
-                    ),
-                  ),
-                ),
+                // SizedBox(height: 50),
+                // ElevatedButton(
+                //   onPressed: () {
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(builder: (context) => GamePage()),
+                //     );
+                //   },
+                //   child: Container(
+                //     height: 60.0,
+                //     width: 200.0,
+                //     child: Center(
+                //       child: Text(
+                //         'Multiplayer',
+                //         style: TextStyle(
+                //             fontSize: 24.0,
+                //             fontWeight: FontWeight.bold,
+                //             letterSpacing: 1.5),
+                //       ),
+                //     ),
+                //   ),
+                //   style: ButtonStyle(
+                //     backgroundColor:
+                //         MaterialStateProperty.all<Color>(Colors.blue),
+                //     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                //       RoundedRectangleBorder(
+                //         borderRadius: BorderRadius.circular(30.0),
+                //       ),
+                //     ),
+                //   ),
+                // ),
                 SizedBox(height: 50),
                 OutlinedButton(
                   onPressed: () {
@@ -165,195 +168,204 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class GamePage extends StatefulWidget {
-  const GamePage({Key? key}) : super(key: key);
+// class GamePage extends StatefulWidget {
+//   const GamePage({Key? key}) : super(key: key);
 
-  @override
-  State<GamePage> createState() => _GamePageState();
-}
+//   @override
+//   State<GamePage> createState() => _GamePageState();
+// }
 
-class _GamePageState extends State<GamePage> {
-  late final MapPage _game;
+// class _GamePageState extends State<GamePage> {
+//   late final MapPage _game;
 
-  /// Holds the RealtimeChannel to sync game states
-  RealtimeChannel? _gameChannel;
+//   /// Holds the RealtimeChannel to sync game states
+//   RealtimeChannel? _gameChannel;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [_game],
-      ),
-    );
-  }
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: Stack(
+//         fit: StackFit.expand,
+//         children: [_game],
+//       ),
+//     );
+//   }
 
-  @override
-  void initState() {
-    super.initState();
-    _initialize();
-  }
+//   List<List<Cell>> cells = [];
+//   @override
+//   void initState() {
+//     super.initState();
 
-  Future<void> _initialize() async {
-    _game = MapPage(onGameStateUpdate: (temp) async {
-      ChannelResponse response;
-      do {
-        response = await _gameChannel!.send(
-          type: RealtimeListenTypes.broadcast,
-          event: 'game_state',
-          payload: {'temp': temp},
-        );
+//     for (var i = 0; i < 10; i++) {
+//       List<Cell> rowCells = [];
+//       for (var j = 0; j < 4; j++) {
+//         rowCells.add(Cell(row: i, col: j));
+//       }
+//       cells.add(rowCells);
+//     }
+//     _initialize();
+//   }
 
-        // wait for a frame to avoid infinite rate limiting loops
-        await Future.delayed(Duration.zero);
-        setState(() {});
-      } while (response == ChannelResponse.rateLimited);
-    });
+//   Future<void> _initialize() async {
+//     _game = MapPage(onGameStateUpdate: (temp) async {
+//       ChannelResponse response;
+//       do {
+//         response = await _gameChannel!.send(
+//           type: RealtimeListenTypes.broadcast,
+//           event: 'game_state',
+//           payload: {'game': _game},
+//         );
 
-    // await for a frame so that the widget mounts
-    await Future.delayed(Duration.zero);
+//         // wait for a frame to avoid infinite rate limiting loops
+//         await Future.delayed(Duration.zero);
+//         setState(() {});
+//       } while (response == ChannelResponse.rateLimited);
+//     });
 
-    if (mounted) {
-      _openLobbyDialog();
-    }
-  }
+//     // await for a frame so that the widget mounts
+//     await Future.delayed(Duration.zero);
 
-  void _openLobbyDialog() {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return _LobbyDialog(
-            onGameStarted: (gameId) async {
-              // await a frame to allow subscribing to a new channel in a realtime callback
-              await Future.delayed(Duration.zero);
+//     if (mounted) {
+//       _openLobbyDialog();
+//     }
+//   }
 
-              setState(() {});
+//   void _openLobbyDialog() {
+//     showDialog(
+//         context: context,
+//         barrierDismissible: false,
+//         builder: (context) {
+//           return _LobbyDialog(
+//             onGameStarted: (gameId) async {
+//               // await a frame to allow subscribing to a new channel in a realtime callback
+//               await Future.delayed(Duration.zero);
 
-              _gameChannel = supabase.channel(gameId,
-                  opts: const RealtimeChannelConfig(ack: true));
+//               setState(() {});
 
-              _gameChannel!.on(RealtimeListenTypes.broadcast,
-                  ChannelFilter(event: 'game_state'), (payload, [_]) {
-                final temp = payload['temp'];
-                _game.updatePlayer(
-                  position: temp,
-                );
-                // _game.update();
-              }).subscribe();
-            },
-          );
-        });
-  }
-}
+//               _gameChannel = supabase.channel(gameId,
+//                   opts: const RealtimeChannelConfig(ack: true));
 
-class _LobbyDialog extends StatefulWidget {
-  const _LobbyDialog({
-    required this.onGameStarted,
-  });
+//               _gameChannel!.on(RealtimeListenTypes.broadcast,
+//                   ChannelFilter(event: 'game_state'), (payload, [_]) {
+//                 final temp = payload['temp'];
+//                 _game.updatePlayer(
+//                   position: temp,
+//                 );
+//                 // _game.update();
+//               }).subscribe();
+//             },
+//           );
+//         });
+//   }
+// }
 
-  final void Function(String gameId) onGameStarted;
+// class _LobbyDialog extends StatefulWidget {
+//   const _LobbyDialog({
+//     required this.onGameStarted,
+//   });
 
-  @override
-  State<_LobbyDialog> createState() => _LobbyDialogState();
-}
+//   final void Function(String gameId) onGameStarted;
 
-class _LobbyDialogState extends State<_LobbyDialog> {
-  List<String> _userids = [];
-  bool _loading = false;
+//   @override
+//   State<_LobbyDialog> createState() => _LobbyDialogState();
+// }
 
-  /// Unique identifier for each players to identify eachother in lobby
-  final myUserId = const Uuid().v4();
+// class _LobbyDialogState extends State<_LobbyDialog> {
+//   List<String> _userids = [];
+//   bool _loading = false;
 
-  late final RealtimeChannel _lobbyChannel;
+//   /// Unique identifier for each players to identify eachother in lobby
+//   final myUserId = const Uuid().v4();
 
-  @override
-  void initState() {
-    super.initState();
+//   late final RealtimeChannel _lobbyChannel;
 
-    _lobbyChannel = supabase.channel(
-      'lobby',
-      opts: const RealtimeChannelConfig(self: true),
-    );
-    _lobbyChannel.on(RealtimeListenTypes.presence, ChannelFilter(event: 'sync'),
-        (payload, [ref]) {
-      // Update the lobby count
-      final presenceState = _lobbyChannel.presenceState();
+//   @override
+//   void initState() {
+//     super.initState();
 
-      setState(() {
-        _userids = presenceState.values
-            .map((presences) =>
-                (presences.first as Presence).payload['user_id'] as String)
-            .toList();
-      });
-    }).on(RealtimeListenTypes.broadcast, ChannelFilter(event: 'game_start'),
-        (payload, [_]) {
-      // Start the game if someone has started a game with you
-      final participantIds = List<String>.from(payload['participants']);
-      if (participantIds.contains(myUserId)) {
-        final gameId = payload['game_id'] as String;
-        widget.onGameStarted(gameId);
-        Navigator.of(context).pop();
-      }
-    }).subscribe(
-      (status, [ref]) async {
-        if (status == 'SUBSCRIBED') {
-          await _lobbyChannel.track({'user_id': myUserId});
-        }
-      },
-    );
-  }
+//     _lobbyChannel = supabase.channel(
+//       'lobby',
+//       opts: const RealtimeChannelConfig(self: true),
+//     );
+//     _lobbyChannel.on(RealtimeListenTypes.presence, ChannelFilter(event: 'sync'),
+//         (payload, [ref]) {
+//       // Update the lobby count
+//       final presenceState = _lobbyChannel.presenceState();
 
-  @override
-  void dispose() {
-    supabase.removeChannel(_lobbyChannel);
-    super.dispose();
-  }
+//       setState(() {
+//         _userids = presenceState.values
+//             .map((presences) =>
+//                 (presences.first as Presence).payload['user_id'] as String)
+//             .toList();
+//       });
+//     }).on(RealtimeListenTypes.broadcast, ChannelFilter(event: 'game_start'),
+//         (payload, [_]) {
+//       // Start the game if someone has started a game with you
+//       final participantIds = List<String>.from(payload['participants']);
+//       if (participantIds.contains(myUserId)) {
+//         final gameId = payload['game_id'] as String;
+//         widget.onGameStarted(gameId);
+//         Navigator.of(context).pop();
+//       }
+//     }).subscribe(
+//       (status, [ref]) async {
+//         if (status == 'SUBSCRIBED') {
+//           await _lobbyChannel.track({'user_id': myUserId});
+//         }
+//       },
+//     );
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Lobby'),
-      content: _loading
-          ? const SizedBox(
-              height: 100,
-              child: Center(child: CircularProgressIndicator()),
-            )
-          : Text('${_userids.length} users waiting'),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-            Navigator.pop(context);
-          },
-          child: const Text('Back'),
-        ),
-        TextButton(
-          onPressed: _userids.length < 2
-              ? null
-              : () async {
-                  setState(() {
-                    _loading = true;
-                  });
+//   @override
+//   void dispose() {
+//     supabase.removeChannel(_lobbyChannel);
+//     super.dispose();
+//   }
 
-                  final opponentId =
-                      _userids.firstWhere((userId) => userId != myUserId);
-                  final gameId = const Uuid().v4();
-                  await _lobbyChannel.send(
-                    type: RealtimeListenTypes.broadcast,
-                    event: 'game_start',
-                    payload: {
-                      'participants': [
-                        opponentId,
-                        myUserId,
-                      ],
-                      'game_id': gameId,
-                    },
-                  );
-                },
-          child: const Text('start'),
-        ),
-      ],
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return AlertDialog(
+//       title: const Text('Lobby'),
+//       content: _loading
+//           ? const SizedBox(
+//               height: 100,
+//               child: Center(child: CircularProgressIndicator()),
+//             )
+//           : Text('${_userids.length} users waiting'),
+//       actions: [
+//         TextButton(
+//           onPressed: () {
+//             Navigator.pop(context);
+//             Navigator.pop(context);
+//           },
+//           child: const Text('Back'),
+//         ),
+//         TextButton(
+//           onPressed: _userids.length < 2
+//               ? null
+//               : () async {
+//                   setState(() {
+//                     _loading = true;
+//                   });
+
+//                   final opponentId =
+//                       _userids.firstWhere((userId) => userId != myUserId);
+//                   final gameId = const Uuid().v4();
+//                   await _lobbyChannel.send(
+//                     type: RealtimeListenTypes.broadcast,
+//                     event: 'game_start',
+//                     payload: {
+//                       'participants': [
+//                         opponentId,
+//                         myUserId,
+//                       ],
+//                       'game_id': gameId,
+//                     },
+//                   );
+//                 },
+//           child: const Text('start'),
+//         ),
+//       ],
+//     );
+//   }
+// }

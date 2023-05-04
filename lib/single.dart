@@ -2,6 +2,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:project1/Tree.dart';
+import 'package:project1/Water.dart';
 import 'Player.dart';
 import 'Enemy.dart';
 import 'Cell.dart';
@@ -18,16 +20,23 @@ class _MapPageState extends State<Single> {
   int _highScore = 0;
   int actionpointE = 4;
   bool isEnmyturn = false;
-  Player player = Player(
-      strength: 400, vitality: 200, intellect: 5, row: 0, col: 0, turn: true);
+  Player player = Player(row: 0, col: 0, turn: true);
 
   List<Enemy> enemies = [
-    Enemy(strength: 10, vitality: 10, intellect: 5, row: 1, col: 1),
-    Enemy(strength: 10, vitality: 10, intellect: 5, row: 2, col: 2),
-    // Enemy(strength: 10, vitality: 10, intellect: 5, row: 3, col: 2),
-    // Enemy(strength: 10, vitality: 10, intellect: 5, row: 8, col: 2),
-    // Enemy(strength: 10, vitality: 10, intellect: 5, row: 5, col: 1),
-    // Enemy(strength: 10, vitality: 10, intellect: 5, row: 4, col: 2),
+    Enemy(strength: 7, vitality: 10, intellect: 5, row: 1, col: 1),
+    Enemy(strength: 7, vitality: 10, intellect: 5, row: 2, col: 2),
+  ];
+  List<Tree> trees = [
+    Tree(row: 2, col: 4),
+    Tree(row: 8, col: 2),
+  ];
+
+  List<Water> waterr = [
+    Water(row: 5, col: 2),
+    Water(row: 5, col: 3),
+    Water(row: 5, col: 4),
+    Water(row: 5, col: 5),
+    Water(row: 6, col: 4),
   ];
 
   List<List<Cell>> cells = [];
@@ -35,15 +44,10 @@ class _MapPageState extends State<Single> {
   @override
   void initState() {
     super.initState();
-    getHighScore().then((value) {
-      setState(() {
-        _highScore = value;
-      });
-    });
 
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < 16; i++) {
       List<Cell> rowCells = [];
-      for (var j = 0; j < 4; j++) {
+      for (var j = 0; j < 10; j++) {
         rowCells.add(Cell(row: i, col: j));
       }
       cells.add(rowCells);
@@ -57,6 +61,27 @@ class _MapPageState extends State<Single> {
   void enemyTurn() {
     setState(() {
       bool anyEnemyHasActionPoints = false;
+      if (player.health <= 0) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text('Defeated!'),
+              content: Text('You are defeated.'),
+              actions: [
+                TextButton(
+                  child: Text('Return to main page'),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
       for (final enemy in enemies) {
         if (actionpointE > 0) {
           anyEnemyHasActionPoints = true;
@@ -70,15 +95,25 @@ class _MapPageState extends State<Single> {
                   (cell.row != player.row || cell.col != player.col))
               .toList();
 
-          if (validMoves.isNotEmpty) {
-            // move1 the enemy to a random valid cell
+          final validAttacks = cells
+              .expand((rowCells) => rowCells)
+              .where((cell) => enemies.any((e) =>
+                  (player.row - e.row).abs() <= 1 &&
+                  (player.col - e.col).abs() <= 1))
+              .toList();
+
+          if (validAttacks.isNotEmpty) {
+            // attack the player if in range
+            player.health -= enemy.strength; // reduce player's health by 10
+            actionpointE--; // deduct one action point
+          } else if (validMoves.isNotEmpty) {
+            // move the enemy to a random valid cell
             final random = Random();
             final targetCell = validMoves[random.nextInt(validMoves.length)];
             enemy.row = targetCell.row;
             enemy.col = targetCell.col;
+            actionpointE--; // deduct one action point
           }
-
-          actionpointE--; // deduct one action point
         }
       }
 
@@ -95,7 +130,8 @@ class _MapPageState extends State<Single> {
     });
   }
 
-  void checkTurn(bool isPlayer, bool isEnemy, Cell cell) {
+  void checkTurn(
+      bool isPlayer, bool isEnemy, Cell cell, bool isTree, bool isWater) {
     setState(() {
       if (enemies.isEmpty) {
         setState(() {
@@ -111,6 +147,7 @@ class _MapPageState extends State<Single> {
                 TextButton(
                   child: Text('Return to main page'),
                   onPressed: () {
+                    Navigator.pop(context);
                     Navigator.pop(context);
                     Navigator.pop(context);
                   },
@@ -141,10 +178,9 @@ class _MapPageState extends State<Single> {
                             onTap: () {
                               Navigator.pop(context);
                               setState(() {
-                                player.attack(
-                                    cell, cells, enemies, isHighlightModeOn);
+                                player.attack(cell, cells, enemies,
+                                    isHighlightModeOn, trees, waterr);
                                 isHighlightModeOn = !isHighlightModeOn;
-                                actionCount();
                               });
                             },
                           ),
@@ -158,14 +194,14 @@ class _MapPageState extends State<Single> {
             return;
           }
           if (isPlayer) {
-            player.toggleHighlightMode(cells, enemies, isHighlightModeOn);
+            player.toggleHighlightMode(
+                cells, enemies, isHighlightModeOn, trees, waterr);
             isHighlightModeOn = !isHighlightModeOn;
           } else if (cell.isValidMove) {
             if (!isEnemy) {
               setState(() {
                 player.move(cell, cells);
                 isHighlightModeOn = !isHighlightModeOn;
-                actionCount();
               });
             }
           } else {
@@ -209,117 +245,14 @@ class _MapPageState extends State<Single> {
     showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext context) {
-        return AnimatedOpacity(
-          opacity: isStatusVisible ? 1.0 : 0.0,
-          duration: Duration(milliseconds: 500),
-          child: Positioned(
-            top: 20,
-            left: 20,
-            child: Container(
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.grey[800],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Player Status:',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Strength: ${player.strength}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
-                  Text(
-                    'Health: ${player.health}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    'Enemies:',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: enemies
-                        .asMap()
-                        .map(
-                          (index, enemy) => MapEntry(
-                            index,
-                            Text(
-                              'Enemy ${index + 1}: Strength: ${enemy.strength}, Health: ${enemy.health}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        )
-                        .values
-                        .toList(),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        return PlayerStatusWidget(
+          isStatusVisible: isStatusVisible,
+          player: player,
+          enemies: enemies,
+          isHighlightModeOn: isHighlightModeOn,
         );
       },
     );
-  }
-
-  Future<void> _writeHighScore(int highScore) async {
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/highscore.txt');
-      await file.writeAsString('$highScore');
-    } catch (e) {
-      print('Error writing high score file: $e');
-    }
-  }
-
-  void actionCount() {
-    setState(() {
-      print('test');
-      action++;
-      if (action > _highScore) {
-        print('test2');
-        _highScore = action;
-        _writeHighScore(_highScore);
-      }
-    });
-  }
-
-  Future<int> getHighScore() async {
-    try {
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/highscore.txt');
-      if (await file.exists()) {
-        final contents = await file.readAsString();
-        return int.parse(contents);
-      } else {
-        return 0;
-      }
-    } catch (e) {
-      return 0;
-    }
   }
 
   @override
@@ -327,41 +260,26 @@ class _MapPageState extends State<Single> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Single player'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.info_outline),
-            onPressed: () {
-              setState(() {
-                show(isStatusVisible, player, enemies, isHighlightModeOn);
-                isStatusVisible = !isStatusVisible;
-              });
-            },
-          ),
-          FutureBuilder<int>(
-            future: getHighScore(),
-            builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-              if (snapshot.hasData) {
-                return Text('High Score: ${snapshot.data}');
-              } else {
-                return Text('High Score: -');
-              }
-            },
-          ),
-        ],
       ),
       body: Stack(
         children: [
           Container(
             padding: EdgeInsets.all(8),
             child: GridView.count(
-              crossAxisCount: 4,
+              crossAxisCount: 10,
               children: cells.expand((row) => row).map((cell) {
                 bool isPlayer =
                     cell.row == player.row && cell.col == player.col;
                 bool isEnemy = enemies.any(
                     (enemy) => cell.row == enemy.row && cell.col == enemy.col);
+                bool isTree = trees.any(
+                    (tree) => cell.row == tree.row && cell.col == tree.col);
+                bool isWater = waterr.any(
+                    (water) => cell.row == water.row && cell.col == water.col);
+
                 return GestureDetector(
-                  onTap: () => checkTurn(isPlayer, isEnemy, cell),
+                  onTap: () =>
+                      checkTurn(isPlayer, isEnemy, cell, isTree, isWater),
                   child: Container(
                     decoration: BoxDecoration(
                       border: Border.all(
@@ -369,33 +287,55 @@ class _MapPageState extends State<Single> {
                       ),
                       color: isPlayer
                           ? Colors.red
-                          : isEnemy
-                              ? (cell.isValidMove
-                                  ? (isHighlightModeOn
-                                      ? Colors.yellow
-                                      : Colors.black)
-                                  : Colors.black)
-                              : (cell.isValidMove
-                                  ? (isHighlightModeOn
-                                      ? Colors.grey[300]
-                                      : Colors.green)
-                                  : Colors.green),
+                          : isTree
+                              ? Color.fromARGB(255, 20, 124, 22)
+                              : isWater
+                                  ? Colors.blue
+                                  : isEnemy
+                                      ? (cell.isValidMove
+                                          ? (isHighlightModeOn
+                                              ? Colors.yellow
+                                              : Colors.black)
+                                          : Colors.black)
+                                      : (cell.isValidMove
+                                          ? (isHighlightModeOn
+                                              ? Colors.grey[300]
+                                              : Colors.green)
+                                          : Colors.green),
                     ),
                     child: Stack(
                       children: [
                         if (player.turn)
                           if (isPlayer)
                             Center(
-                              child: Icon(
-                                Icons.person,
-                                size: 40,
+                              child: Image.asset(
+                                player.Pclass[Player.Ptype]!,
+                                width: 40,
+                                height: 40,
                               ),
                             ),
                         if (isEnemy)
                           Center(
-                            child: Icon(
-                              Icons.dangerous,
-                              size: 40,
+                            child: Image.asset(
+                              'assets/Prayut_2022.jpg',
+                              width: 40,
+                              height: 40,
+                            ),
+                          ),
+                        if (isTree)
+                          Center(
+                            child: Image.asset(
+                              'assets/Prayut_2022.jpg',
+                              width: 40,
+                              height: 40,
+                            ),
+                          ),
+                        if (isWater)
+                          Center(
+                            child: Image.asset(
+                              'assets/Prayut_2022.jpg',
+                              width: 40,
+                              height: 40,
                             ),
                           ),
                       ],
@@ -426,7 +366,115 @@ class _MapPageState extends State<Single> {
               ),
             ),
           ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            child: IconButton(
+              icon: Icon(Icons.info_outline),
+              onPressed: () {
+                show(true, player, enemies, false);
+              },
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class PlayerStatusWidget extends StatelessWidget {
+  final bool isStatusVisible;
+  final Player player;
+  final List<Enemy> enemies;
+  final bool isHighlightModeOn;
+
+  const PlayerStatusWidget({
+    Key? key,
+    required this.isStatusVisible,
+    required this.player,
+    required this.enemies,
+    required this.isHighlightModeOn,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: isStatusVisible ? 1.0 : 0.0,
+      duration: Duration(milliseconds: 500),
+      child: Positioned(
+        top: 20,
+        left: 20,
+        child: Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.grey[800],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Player Status:',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Strength: ${Player.strength}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+              Text(
+                'Health: ${player.health}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+              Text(
+                'Int: ${Player.intellect}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
+              ),
+              SizedBox(height: 20),
+              Text(
+                'Enemies:',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: enemies
+                    .asMap()
+                    .map(
+                      (index, enemy) => MapEntry(
+                        index,
+                        Text(
+                          'Enemy ${index + 1}: Strength: ${enemy.strength}, Health: ${enemy.health}',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    )
+                    .values
+                    .toList(),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
