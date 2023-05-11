@@ -17,9 +17,9 @@ class Player {
   bool turn = true;
   static String Ptype = "";
   var Pclass = {
-    "w": "assets/IT-R610300.jpg",
-    "a": "assets/IT-R610300.jpg",
-    "m": "assets/IT-R610300.jpg"
+    "w": "assets/knight 0.png",
+    "a": "assets/archer with a b 0.png",
+    "m": "assets/mage 1.png"
   };
   Player({required this.row, required this.col, required this.turn}) {
     // set strength, vitality, and intellect based on player type
@@ -43,10 +43,9 @@ class Player {
   void move(Cell cell, List<List<Cell>> cells) {
     if (actionpoint > 0) {
       actionpoint--;
-<<<<<<< HEAD
-=======
+
       // Set isValidMove to false for all cells
->>>>>>> 8b7346b1122139336d21fcc9efcbdc30a27a6798
+
       cells.forEach((rowCells) {
         rowCells.forEach((c) => c.isValidMove = false);
       });
@@ -149,10 +148,7 @@ class Player {
       bool isHighlightModeOn, List<Tree> trees, List<Water> waterr) {
     if (actionpoint > 0) {
       actionpoint--;
-<<<<<<< HEAD
-=======
 
->>>>>>> 8b7346b1122139336d21fcc9efcbdc30a27a6798
       // find the enemy in the list
       Enemy enemy = enemies.firstWhere(
           (enemy) => enemy.row == enemyCell.row && enemy.col == enemyCell.col);

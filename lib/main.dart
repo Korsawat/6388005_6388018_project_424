@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:project1/Multi.dart';
+import 'Multi.dart';
 import 'package:uuid/uuid.dart';
 import 'Cell.dart';
 import 'Type.dart';

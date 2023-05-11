@@ -2,8 +2,8 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:project1/Tree.dart';
-import 'package:project1/Water.dart';
+import 'Tree.dart';
+import 'Water.dart';
 import 'Player.dart';
 import 'Enemy.dart';
 import 'Cell.dart';
@@ -25,10 +25,14 @@ class _MapPageState extends State<Single> {
   List<Enemy> enemies = [
     Enemy(strength: 7, vitality: 10, intellect: 5, row: 1, col: 1),
     Enemy(strength: 7, vitality: 10, intellect: 5, row: 2, col: 2),
+    Enemy(strength: 7, vitality: 10, intellect: 5, row: 5, col: 3),
+    Enemy(strength: 7, vitality: 10, intellect: 5, row: 4, col: 5),
   ];
   List<Tree> trees = [
     Tree(row: 2, col: 4),
     Tree(row: 8, col: 2),
+    Tree(row: 2, col: 3),
+    Tree(row: 5, col: 2),
   ];
 
   List<Water> waterr = [
@@ -37,6 +41,9 @@ class _MapPageState extends State<Single> {
     Water(row: 5, col: 4),
     Water(row: 5, col: 5),
     Water(row: 6, col: 4),
+    Water(row: 12, col: 4),
+    Water(row: 12, col: 5),
+    Water(row: 13, col: 4),
   ];
 
   List<List<Cell>> cells = [];
@@ -288,7 +295,7 @@ class _MapPageState extends State<Single> {
                       color: isPlayer
                           ? Colors.red
                           : isTree
-                              ? Color.fromARGB(255, 20, 124, 22)
+                              ? Color.fromARGB(255, 14, 43, 15)
                               : isWater
                                   ? Colors.blue
                                   : isEnemy
@@ -310,32 +317,36 @@ class _MapPageState extends State<Single> {
                             Center(
                               child: Image.asset(
                                 player.Pclass[Player.Ptype]!,
-                                width: 40,
-                                height: 40,
+                                width: 100,
+                                height: 100,
                               ),
                             ),
                         if (isEnemy)
                           Center(
                             child: Image.asset(
-                              'assets/Prayut_2022.jpg',
-                              width: 40,
-                              height: 40,
+                              'assets/goblin 0.png',
+                              width: 100,
+                              height: 100,
                             ),
                           ),
-                        if (isTree)
+                        if (!isTree &&
+                            !isPlayer &&
+                            !isEnemy &&
+                            !isWater &&
+                            !cell.isValidMove)
                           Center(
                             child: Image.asset(
-                              'assets/Prayut_2022.jpg',
-                              width: 40,
-                              height: 40,
+                              'assets/grss2.png',
+                              width: 100,
+                              height: 100,
                             ),
                           ),
                         if (isWater)
                           Center(
                             child: Image.asset(
-                              'assets/Prayut_2022.jpg',
-                              width: 40,
-                              height: 40,
+                              'assets/Water.png',
+                              width: 100,
+                              height: 100,
                             ),
                           ),
                       ],

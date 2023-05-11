@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project1/single.dart';
+import 'single.dart';
 
 import 'Player.dart';
 
@@ -17,7 +17,7 @@ class _SelectPlayerTypePageState extends State<SelectPlayerTypePage> {
       type: 'W',
       description: 'A fierce fighter who excels in close combat.',
       image: Image.asset(
-        'assets/Prayut_2022.jpg',
+        'assets/knight 0.png',
         width: 100,
         height: 100,
       ),
@@ -27,7 +27,7 @@ class _SelectPlayerTypePageState extends State<SelectPlayerTypePage> {
       type: 'A',
       description: 'A skilled marksman who can take out foes from afar.',
       image: Image.asset(
-        'assets/Prayut_2022.jpg',
+        'assets/archer with a b 0.png',
         width: 100,
         height: 100,
       ),
@@ -37,7 +37,7 @@ class _SelectPlayerTypePageState extends State<SelectPlayerTypePage> {
       type: 'm',
       description: 'Mage',
       image: Image.asset(
-        'assets/Prayut_2022.jpg',
+        'assets/mage 1.png',
         width: 100,
         height: 100,
       ),
